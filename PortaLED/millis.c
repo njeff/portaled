@@ -2,10 +2,9 @@
 /* Millisecond timer                                                    */
 /************************************************************************/
 
-#include <avr/io.h>
-#include <avr/interrupt.h>
+#include "millis.h"
 
-static volatile unsigned long long ms = 0;
+static volatile unsigned long ms = 0;
 
 void init_millis() {
 	//system timer
@@ -16,7 +15,7 @@ void init_millis() {
 	TCCR0B |= 1 << CS01; //8x prescaler
 }
 
-unsigned long long millis() {
+unsigned long millis() {
 	return ms;
 }
 
