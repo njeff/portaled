@@ -13,6 +13,7 @@
 #include "millis.h"
 #include "util.h"
 
+// blocking numerical blinkout
 void blinkNumbers(uint8_t num) {
 	while (num > 0) {
 		PORTB ^= 1 << PB4;
@@ -38,6 +39,7 @@ int main(void) {
 
 		if (lastDuration() != 0) {
 			if (!updated) {
+				//momentary press to change levels
 				if (lastDuration() < 1000) {
 					level = templevel - 1;
 					templevel = templevel * 2;
@@ -47,12 +49,15 @@ int main(void) {
 					}
 					
 					eeprom_write_byte((uint8_t*)0, level);
+					
+					//limit output when on USB bus
 					if (voltage > 4500) {
 						if (level >= 127) {
 							level = 0;
 						}
 					}
 				}
+				//2 second hold for voltage
 				if (lastDuration() > 2000) {
 					blinkNumbers(voltage / 1000);
 					blinkNumbers((voltage / 100) % 10);
@@ -64,7 +69,7 @@ int main(void) {
 		}
 
 		// disable if low battery
-		if (voltage < 3400) {
+		if (voltage < 3600) {
 			level = 0;
 		}
 		
