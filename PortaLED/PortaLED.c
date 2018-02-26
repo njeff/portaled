@@ -26,54 +26,43 @@ void blinkNumbers(uint8_t num) {
 
 int main(void) {
 	init();
-	//unsigned long lastTime = 0;
-	unsigned long lastPress = 0;
-	uint8_t held = 0;
-	
-	int templevel = 1;
 	
 	//recall last level
+	uint8_t updated = 0;
 	uint8_t level = eeprom_read_byte((uint8_t*)0);
+	int templevel = level + 1;
 	long voltage = 0;
+	
     while(1) {
 		voltage = readVoltage();
-		//if (millis() - lastTime > voltage) {
-		//	PORTB ^= 1 << PB4;
-		//	lastTime = millis();
-		//}
-		
-		//if pressed
-		if (!(PINB & 1 << PB3)) {
-			if (millis() - lastPress > 100 && !held) {
-				lastPress = millis();
-				level = templevel - 1;
-				templevel = templevel * 2;
-				
-				if (templevel == 256) {
-					templevel = 1;
-				}
-				
-				eeprom_write_byte((uint8_t*)0, level);
-				if (voltage > 4500) {
-					if (level >= 127) {
-						level = 0;
+
+		if (lastDuration() != 0) {
+			if (!updated) {
+				if (lastDuration() < 1000) {
+					level = templevel - 1;
+					templevel = templevel * 2;
+					
+					if (templevel >= 256) {
+						templevel = 1;
+					}
+					
+					eeprom_write_byte((uint8_t*)0, level);
+					if (voltage > 4500) {
+						if (level >= 127) {
+							level = 0;
+						}
 					}
 				}
+				if (lastDuration() > 2000) {
+					blinkNumbers(voltage / 1000);
+					blinkNumbers((voltage / 100) % 10);
+				}
 			}
-			held = 1;
+			updated = 1;
 		} else {
-			held = 0;
+			updated = 0;
 		}
-		
-		if (held) {
-			//blink out battery
-			if (millis() - lastPress > 2000) {
-				//blocking method
-				blinkNumbers(voltage / 1000);
-				blinkNumbers((voltage / 100) % 10);
-			}
-		}
-		
+
 		// disable if low battery
 		if (voltage < 3400) {
 			level = 0;

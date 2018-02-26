@@ -6,5 +6,7 @@
 long readVoltage();
 void init_adc();
 void init();
+uint8_t held();
+unsigned long lastDuration();
 
 #endif
