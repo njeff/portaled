@@ -1,0 +1,46 @@
+*model for MAX40200
+*version 1: 10/2016
+**************************************************************************************
+.subckt MAX40200 VDD GND OUT EN
+S1 VDD IO1 ctl 0 smod
+Vio IO1 IO2 17.5m
+S2 IO2 IO3 ctl1 0 smod
+S3 IO3 OUT ctl2 0 smod
+X_1 0 en ctl1 shdn
+Ectl ctl 0 value={if(V(vdd)<V(out),0,1)}
+Ectl2 ctl2 0 value={if(V(10)<(-14),0,1)}
+Vint int 0 2
+.model smod VSWITCH (Ron=27.5m Roff=15meg Von=0.8 Voff=0.5)
+Gsup int GND value={7u*V(ctl)*V(ctl1)*V(ctl2)+(1-V(ctl))*0.01u+(1-V(ctl1))*0.83u}
+Rt 10 0 ares 1k
+I0 0 10 1m
+.model ares res (R=10 tc1=-0.02)
+***********************************************************************
+.SUBCKT SHDN 18 91 cs
+***********************************************************************
+V10 10 0 5
+E20 20 18 10 18 0.5
+Ecs cs 18 VALUE={V(96)-V(20)}
+*SHUTDOWN
+RSHIN 91 20 5000K
+ESH3 220 20 91 18 1
+RSHA 220 221 1K
+CSHA 221 20 32P
+ESH2 92 20 221 20 1
+RSH1 92 93 100
+VSH1 93 94 0V
+EHYS 95 94 POLY(2) 10 18 96 20 0 0 0 0 0.33
+RBL 94 20 10K  
+ESH1 95 20 10 18 0.45
+****
+*FSH1 20 96 Vsh1 1
+*CSH1 96 20 10P
+*DSH2 20 96 DA
+*DSH1 96 97 DA
+*VSH2 97 20 1V
+*RSH2 96 20 100K
+E96 96 18 value={if(I(vsh1)<0,2.5,3.5)}
+.MODEL DA D(N=10M)
+*.MODEL DA D
+.ends
+***********************************************************************
